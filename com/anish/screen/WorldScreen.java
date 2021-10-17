@@ -3,57 +3,51 @@ package com.anish.screen;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 
-import com.anish.calabashbros.QSorter;
 import com.anish.calabashbros.Calabash;
 import com.anish.calabashbros.World;
+import com.anish.calabashbros.MazeGenerator;
 import com.anish.calabashbros.Wall;
 import com.anish.calabashbros.Floor;
-
-
+import com.anish.calabashbros.Floor2;
+import com.anish.calabashbros.BFS;
 
 import asciiPanel.AsciiPanel;
-import java.util.Random;
 public class WorldScreen implements Screen {
 
     private World world;
-    private Calabash[][] mons;
-    private Calabash[] monSter;
+    private Calabash player;
     String[] sortSteps;
     Color []monster =new Color[256];
-    int []a=new int[256];
-    Random r=new Random();
+    MazeGenerator mazeGenerator;
     Wall wa=new Wall(world);
     Floor fo=new Floor(world);
+    Floor2 fo2=new Floor2(world);
     String p="";
     public WorldScreen() {
         world = new World();
-        for(int i=0;i<256;i++){
-            monster[i]=new Color(i,Math.abs(255-i-i),255-i);
-            a[i]=i;
-        }
+        mazeGenerator = new MazeGenerator(60);
+        mazeGenerator.generateMaze();
         
-        for(int i=0;i<256;i++){
-            int r1=r.nextInt(255);
-            int temp=a[i];
-            a[i]=a[r1];
-            a[r1]=temp;
-        }
-        mons=new Calabash[16][16];
-        monSter=new Calabash[256];
-        for(int i=0;i<256;i++){
-            mons[a[i]/16][a[i]%16]=new Calabash(monster[i], i+1, world);
-        }
-        for(int i=0;i<16;i++){
-            for(int j=0;j<16;j++){
-                world.put(mons[i][j], 10+j*2, 10+i*2);
-                monSter[i*16+j]=mons[i][j];
+        for(int i=0;i<60;i++){
+            for(int j=0;j<60;j++){
+                if(mazeGenerator.maze[i][j]==0){
+                    world.put(wa, i, j);
+                }
             }
         }
-        QSorter<Calabash> b = new QSorter<>();
-        b.load(monSter);
-        b.sort();
+        for(int i=0;i<60;i++){
+            for(int j=0;j<60;j++){
+                if(mazeGenerator.maze[i][j]==1){
+                    world.put(fo, i, j);
+                }
+            }
+        }
+        player=new Calabash(new Color(255,0,0), 1, world);
+        world.put(player,0,0);
+        BFS b=new BFS(mazeGenerator.maze);
+        b.go();
+        sortSteps = this.parsePlan(b.GPlan());
         
-        sortSteps = this.parsePlan(b.getPlan());
     }
 
     private String[] parsePlan(String plan) {
@@ -92,7 +86,15 @@ public class WorldScreen implements Screen {
     public Screen respondToUserInput(KeyEvent key) {
 
         if (i < this.sortSteps.length) {
-            this.execute(monSter, sortSteps[i]);
+            //this.execute(mons, sortSteps[i]);
+           String[] c=sortSteps[this.sortSteps.length-1-i].split(",");
+           int x1=Integer.parseInt(c[0]);
+            int y1=Integer.parseInt(c[1]);
+            int x2=Integer.parseInt(c[2]);
+            int y2=Integer.parseInt(c[3]);
+            //System.out.println(x1);
+            world.put(player,x1,y1);
+            world.put(fo2, x2, y2);
             i++;
         }
 

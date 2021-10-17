@@ -8,7 +8,9 @@ import javax.swing.JFrame;
 import com.anish.calabashbros.World;
 import com.anish.screen.Screen;
 import com.anish.screen.WorldScreen;
-
+import com.anish.calabashbros.MazeGenerator;
+import com.anish.calabashbros.Node;
+import com.anish.calabashbros.BFS;
 
 import asciiPanel.AsciiFont;
 import asciiPanel.AsciiPanel;
